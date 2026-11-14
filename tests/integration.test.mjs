@@ -100,6 +100,7 @@ test('runtime host isolates the frame, validates message source and cleans up on
     fetch: globalThis.fetch,
   };
   const listeners = new Set();
+  const posted = [];
   let frame;
   try {
     globalThis.fetch = async () => ({
@@ -118,24 +119,51 @@ test('runtime host isolates the frame, validates message source and cleans up on
           setAttribute(k, v) {
             this.attributes[k] = v;
           },
-          contentWindow: { postMessage() {} },
+          contentWindow: {
+            postMessage(value) {
+              posted.push(value);
+            },
+          },
           remove() {
             this.removed = true;
           },
         }),
       body: { appendChild() {} },
     };
+    const runnerHtml = readFileSync('public/runner.html', 'utf8');
+    assert.match(runnerHtml, /connect-src 'none'/);
+    assert.match(runnerHtml, /worker-src blob:/);
+    assert.match(runnerHtml, /runner-bridge\.js/);
+
     const { runCode } = await importTs('lib/run-code.ts');
     const promise = runCode('return [];', {}, new AbortController().signal);
     await new Promise((r) => setImmediate(r));
     assert.equal(frame.attributes.sandbox, 'allow-scripts');
-    assert.match(frame.srcdoc, /connect-src 'none'/);
-    assert.match(frame.srcdoc, /worker-src blob:/);
-    const nonce = JSON.parse(frame.srcdoc.match(/const nonce=("[^"]+")/)[1]);
+    assert.equal(frame.src, 'https://example.test/typescript-lab/runner.html');
+    assert.equal(frame.srcdoc, undefined);
+
+    for (const fn of listeners)
+      fn({ source: {}, data: { ready: true } });
+    assert.equal(posted.length, 0);
+
+    for (const fn of listeners)
+      fn({ source: frame.contentWindow, data: { ready: true } });
+    assert.equal(posted.length, 1);
+    const { nonce, source, code } = posted[0];
+    assert.equal(typeof nonce, 'string');
+    assert.equal(code, 'return [];');
+    assert.match(source, /self\.onmessage/);
+
     for (const fn of listeners)
       fn({
         source: {},
         data: { nonce, result: { rows: [], logs: ['spoof'] } },
+      });
+    assert.ok(!frame.removed);
+    for (const fn of listeners)
+      fn({
+        source: frame.contentWindow,
+        data: { nonce: 'wrong-nonce', result: { rows: [], logs: ['spoof2'] } },
       });
     assert.ok(!frame.removed);
     for (const fn of listeners)
