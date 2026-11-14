@@ -37,6 +37,7 @@ export async function runCode(
     frame.title = '程式執行隔離環境';
     const nonce = crypto.randomUUID();
     let finished = false;
+    let sent = false;
     const finish = (result: RuntimeResult) => {
       if (finished) return;
       finished = true;
@@ -49,18 +50,21 @@ export async function runCode(
     };
     const cancel = () => finish({ rows: [], logs: [], error: '已取消執行' });
     const receive = (event: MessageEvent) => {
-      if (event.source !== frame.contentWindow || event.data?.nonce !== nonce)
-        return;
-      if (event.data.ready) {
-        frame.contentWindow?.postMessage({ code, modules }, '*');
+      if (event.source !== frame.contentWindow) return;
+      if (event.data?.ready && !sent) {
+        sent = true;
+        frame.contentWindow?.postMessage(
+          { nonce, source, code, modules },
+          '*',
+        );
         return;
       }
+      if (event.data?.nonce !== nonce) return;
       finish(event.data.result);
     };
     window.addEventListener('message', receive);
     signal.addEventListener('abort', cancel, { once: true });
-    const script = `const nonce=${JSON.stringify(nonce)};const worker=new Worker(URL.createObjectURL(new Blob([${JSON.stringify(source)}],{type:'text/javascript'})));worker.onmessage=e=>parent.postMessage({nonce,result:e.data},'*');worker.onerror=e=>parent.postMessage({nonce,result:{rows:[],logs:[],error:e.message||'執行失敗'}},'*');onmessage=e=>{if(e.source!==parent)return;if(e.data.stop){worker.terminate();return;}worker.postMessage(e.data);};parent.postMessage({nonce,ready:true},'*');`;
-    frame.srcdoc = `<!doctype html><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval'; worker-src blob:; connect-src 'none'"><script>${script.replace(/<\/script/gi, '<\\/script')}</script>`;
+    frame.src = assetUrl('runner.html');
     const timer = setTimeout(
       () =>
         finish({
