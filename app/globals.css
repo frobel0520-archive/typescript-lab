@@ -5,6 +5,8 @@
 /* 視覺語言對照 Software Engineering Workshop（Engineering Field Manual）：
    米色紙底、深青主色、Newsreader + Noto Serif TC 標題、DM Mono 標籤、方角與細線分隔。
    typescript-lab 與 golang-lab 共用同一份樣式；改其中一份時請一併同步。 */
+/* 刻意保留：shadcn 元件內有 dark: 類別。限定為 .dark 祖先才生效，而本站從不加 .dark，
+   所以整站固定淺色；若移除這行，Tailwind 會改用 prefers-color-scheme，深色系統下只有部分元件變深色。 */
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -195,7 +197,7 @@ a:focus-visible {
   display: block;
   margin-top: 6px;
   color: var(--muted-ink);
-  font: 9px var(--font-code);
+  font: 11px var(--font-code);
   letter-spacing: 0.08em;
 }
 .nav-label {
@@ -204,12 +206,12 @@ a:focus-visible {
   align-items: baseline;
   margin: 30px 0 9px;
   color: var(--muted-ink);
-  font: 8px var(--font-code);
+  font: 11px var(--font-code);
   letter-spacing: 0.11em;
   text-transform: uppercase;
 }
 .nav-label span {
-  font-size: 8px;
+  font-size: 11px;
   letter-spacing: 0.11em;
 }
 .chapter {
@@ -239,13 +241,13 @@ a:focus-visible {
 .chapter-number {
   width: 19px;
   flex: none;
-  font: 10px var(--font-code);
+  font: 11px var(--font-code);
   color: var(--teal-dark);
 }
 .chapter small {
   margin-left: auto;
   color: var(--muted-ink);
-  font: 9px var(--font-code);
+  font: 11px var(--font-code);
 }
 .chapter svg {
   margin-left: auto;
@@ -256,7 +258,7 @@ a:focus-visible {
   justify-content: space-between;
   margin: 16px 0 10px;
   color: var(--muted-ink);
-  font: 9px var(--font-code);
+  font: 11px var(--font-code);
   letter-spacing: 0.08em;
 }
 .progress-label span {
@@ -297,7 +299,7 @@ a:focus-visible {
   padding: 10px 0 0;
   text-align: center;
   color: var(--muted-ink);
-  font: 10px var(--font-serif);
+  font: 11px var(--font-serif);
 }
 
 /* ---------- Workspace ---------- */
@@ -331,7 +333,7 @@ a:focus-visible {
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(12px);
   color: var(--muted-ink);
-  font: 9px var(--font-code);
+  font: 11px var(--font-code);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -348,7 +350,7 @@ a:focus-visible {
   gap: 8px;
   align-items: center;
   margin-left: auto;
-  font-size: 9px;
+  font-size: 11px;
 }
 .local-badge i {
   width: 6px;
@@ -384,7 +386,7 @@ a:focus-visible {
 .eyebrow {
   margin: 0 0 6px;
   color: var(--teal-dark);
-  font: 500 9px var(--font-code);
+  font: 500 11px var(--font-code);
   letter-spacing: 0.13em;
 }
 h1 {
@@ -405,7 +407,7 @@ h1 {
   white-space: nowrap;
 }
 .lesson-count span {
-  font: 10px var(--font-code);
+  font: 11px var(--font-code);
   color: var(--muted-ink);
 }
 .exercise-steps {
@@ -442,7 +444,7 @@ h1 {
   height: 21px;
   background: var(--surface);
   color: var(--teal-dark);
-  font: 10px var(--font-code);
+  font: 11px var(--font-code);
 }
 .exercise-steps button.active span {
   background: var(--teal-dark);
@@ -466,13 +468,13 @@ h1 {
   padding-bottom: 18px;
   border-bottom: 1px solid var(--line);
   color: var(--teal-dark);
-  font: 500 9px var(--font-code);
+  font: 500 11px var(--font-code);
   letter-spacing: 0.13em;
 }
 .panel-label span {
   margin-left: auto;
   color: var(--muted-ink);
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.06em;
 }
 h2 {
@@ -510,7 +512,7 @@ h2 {
 }
 .comparison > span {
   color: var(--teal-dark);
-  font: 500 10px var(--font-code);
+  font: 500 11px var(--font-code);
 }
 .comparison p {
   margin-top: 8px;
@@ -610,12 +612,12 @@ h2 {
   background: var(--code-bar);
   border-bottom: 1px solid var(--code-line);
   color: #a9b0a3;
-  font: 10px var(--font-code);
+  font: 11px var(--font-code);
 }
 .file-icon {
   margin-right: 10px;
   color: #b9ddd7;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
 }
 .editor-panel textarea {
@@ -631,6 +633,10 @@ h2 {
   font-size: 14px;
   tab-size: 2;
 }
+.editor-panel textarea:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: -2px;
+}
 .editor-actions {
   display: flex;
   justify-content: space-between;
@@ -640,7 +646,7 @@ h2 {
 }
 .editor-actions > span {
   color: var(--code-dim);
-  font: 10px var(--font-code);
+  font: 11px var(--font-code);
 }
 .run-button {
   display: flex;
@@ -675,7 +681,7 @@ h2 {
 .results-heading span {
   margin-left: auto;
   color: var(--code-dim);
-  font-size: 10px;
+  font-size: 11px;
 }
 .results > p {
   margin-top: 27px;
